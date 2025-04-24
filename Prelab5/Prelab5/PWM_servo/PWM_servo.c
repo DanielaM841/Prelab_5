@@ -12,10 +12,10 @@
 void PWM1_init()
 {
 	// Configurar Timer1 en modo Fast (no invertido)
-	TCCR1A |= (1 << COM1A1);
+	TCCR1A |= (1 << COM1A1)|(1<<COM1B1);;
 	TCCR1A |=( 1 << WGM11);
 	TCCR1B |= (1<<WGM13) | (1<<WGM12) | (1 << CS11); //Fast mode 8 bits, prescaler de 8
-	ICR1 = 2499; // Valor máximo para no exceder 20ms
+	ICR1 = 2499; // Valor máximo para no exceder 2ms
 	
 }
 uint16_t Valor_Servo_PWM(uint8_t ADC_v)

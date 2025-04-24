@@ -129,8 +129,15 @@
     <Compile Include="PWM_servo\PWM_servo.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="PWM_T0\PWM_T0.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="PWM_T0\PWM_T0.h">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="PWM_T0" />
     <Folder Include="PWM_servo" />
   </ItemGroup>
   <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
