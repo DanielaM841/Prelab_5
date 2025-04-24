@@ -24,21 +24,14 @@ uint16_t DutyCycle_LED=0;
 /***************************/
 // Function prototypes
 void setup();
-//void PWM1_init();
 void ADC_init();
-//void rest_servo();
-//uint16_t Valor_Servo_PWM(uint8_t ADC_v);
 void rest_servo2(uint16_t duty);
 uint16_t Valor_Servo_PWM2(uint8_t ADC_v);
 void Mux_pines();
-//void initT0L();
-//uint8_t ValorPMW_T0_F(uint8_t valordelADC);
-//void comparacion_T0(uint8_t top, uint8_t Valor_comparacion);
 
 int main(void)
 {
 	setup();
-    /* Replace with your application code */
     while (1) 
     {
 		_delay_ms(1);
@@ -67,11 +60,9 @@ void ADC_init()
 	ADMUX |= (1<< REFS0); //REFERENCIA = VCC
 	ADMUX |= (1<< ADLAR); // JUSTIFICACIÓN A LA IZQUIERDA
 	ADMUX &= ~((1 << MUX3) | (1 << MUX2) | (1 << MUX1)); // Limpiar bits MUX 
-	//ADMUX |=  (1<< MUX0); //HABILITAR EL ADC 1
 	
 	ADCSRA = 0;
 	ADCSRA |= (1<< ADPS1) | (1<< ADPS0) | (1<< ADEN) | (1<< ADIE);
-	//ADCSRA |= (1<< ADSC);
 }
 
 void Mux_pines()
@@ -85,17 +76,15 @@ void Mux_pines()
 		Valor_ADC = ADCH;
 		DutyCycle= Valor_Servo_PWM(Valor_ADC);
 		rest_servo(DutyCycle);
-		
-		//DutyCycle= Valor_Servo_PWM(Valor_ADC);
-		//rest_servo(DutyCycle);
 		break;
-		case 1:
 		
+		case 1:
 		ADMUX &= ~((1 << MUX3) | (1 << MUX2) | (1 << MUX1)|(1<< MUX0)); // Limpiar bits MUX
 		ADMUX |=  (1<< MUX1); //HABILITAR EL ADC 2
 		led_pmw= ADCH;
 		DutyCycle_LED=ValorPMW_T0_F(led_pmw);
 		break;
+		
 		case 2:
 		ADMUX &= ~((1 << MUX3) | (1 << MUX2) | (1 << MUX1)|(1<< MUX0)); // Limpiar bits MUX
 		ADMUX |=  (1<< MUX2) ; //HABILITAR EL ADC 3
@@ -116,14 +105,13 @@ void Mux_pines()
 //ISR 
 ISR(ADC_vect){
 	Mux_pines();
-	//_delay_ms(2);
 	ADCSRA |= (1<<ADSC);
 	
 }
 ISR(TIMER0_OVF_vect)
 {
-	Contador_T0++;						// Se suma el contador del timer
-	if (Contador_T0<DutyCycle_LED){
+	Contador_T0++;						//Sumar el contador del timer
+	if (Contador_T0<DutyCycle_LED){ //comparar con el dutycicle del mapeo del led
 		PORTB |= (1<<PORTB3);
 	}
 	else if (Contador_T0>=DutyCycle_LED){
@@ -132,8 +120,8 @@ ISR(TIMER0_OVF_vect)
 	if (Contador_T0 >= 20)
 	{
 		Contador_T0 = 0;
-	}									// Se hace un if para evitar parpadeo
-	TCNT0	= 251;						// Se carca el valor a TCNT0
+	}									// Se hace un if para evitar parpadeo, se cambio a 20 para que no se viera
+	TCNT0	= 251;						
 }
 
 //Funciones de las librerias 
@@ -144,5 +132,5 @@ uint16_t Valor_Servo_PWM2(uint8_t ADC_v2)
 
 void rest_servo2(uint16_t duty)
 {
-	OCR1B = duty;	// Se actualiza el registro con el valor correcto. 
+	OCR1B = duty;	
 }

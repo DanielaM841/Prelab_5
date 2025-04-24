@@ -19,7 +19,7 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING
   7 .debug_abbrev 00000866  00000000  00000000  00000f98  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   000005ee  00000000  00000000  000017fe  2**0
+  8 .debug_line   000005ed  00000000  00000000  000017fe  2**0
                   CONTENTS, READONLY, DEBUGGING
   9 .debug_frame  00000174  00000000  00000000  00001dec  2**2
                   CONTENTS, READONLY, DEBUGGING
@@ -109,7 +109,6 @@ void ADC_init()
   a2:	80 81       	ld	r24, Z
   a4:	81 7f       	andi	r24, 0xF1	; 241
   a6:	80 83       	st	Z, r24
-	//ADMUX |=  (1<< MUX0); //HABILITAR EL ADC 1
 	
 	ADCSRA = 0;
   a8:	ea e7       	ldi	r30, 0x7A	; 122
@@ -162,8 +161,8 @@ void setup()
   e6:	08 95       	ret
 
 000000e8 <main>:
-//uint8_t ValorPMW_T0_F(uint8_t valordelADC);
-//void comparacion_T0(uint8_t top, uint8_t Valor_comparacion);
+uint16_t Valor_Servo_PWM2(uint8_t ADC_v);
+void Mux_pines();
 
 int main(void)
 {
@@ -184,7 +183,7 @@ int main(void)
   f8:	f9 cf       	rjmp	.-14     	; 0xec <main+0x4>
 
 000000fa <__vector_16>:
-	//_delay_ms(2);
+	Mux_pines();
 	ADCSRA |= (1<<ADSC);
 	
 }
@@ -199,11 +198,11 @@ ISR(TIMER0_OVF_vect)
  106:	3f 93       	push	r19
  108:	8f 93       	push	r24
  10a:	9f 93       	push	r25
-	Contador_T0++;						// Se suma el contador del timer
+	Contador_T0++;						//Sumar el contador del timer
  10c:	80 91 02 01 	lds	r24, 0x0102	; 0x800102 <Contador_T0>
  110:	8f 5f       	subi	r24, 0xFF	; 255
  112:	80 93 02 01 	sts	0x0102, r24	; 0x800102 <Contador_T0>
-	if (Contador_T0<DutyCycle_LED){
+	if (Contador_T0<DutyCycle_LED){ //comparar con el dutycicle del mapeo del led
  116:	90 e0       	ldi	r25, 0x00	; 0
  118:	20 91 00 01 	lds	r18, 0x0100	; 0x800100 <__DATA_REGION_ORIGIN__>
  11c:	30 91 01 01 	lds	r19, 0x0101	; 0x800101 <__DATA_REGION_ORIGIN__+0x1>
@@ -232,8 +231,8 @@ ISR(TIMER0_OVF_vect)
 	{
 		Contador_T0 = 0;
  142:	10 92 02 01 	sts	0x0102, r1	; 0x800102 <Contador_T0>
-	}									// Se hace un if para evitar parpadeo
-	TCNT0	= 251;						// Se carca el valor a TCNT0
+	}									// Se hace un if para evitar parpadeo, se cambio a 20 para que no se viera
+	TCNT0	= 251;						
  146:	8b ef       	ldi	r24, 0xFB	; 251
  148:	86 bd       	out	0x26, r24	; 38
 }
@@ -273,7 +272,7 @@ uint16_t Valor_Servo_PWM2(uint8_t ADC_v2)
 
 void rest_servo2(uint16_t duty)
 {
-	OCR1B = duty;	// Se actualiza el registro con el valor correcto. 
+	OCR1B = duty;	
  17c:	90 93 8b 00 	sts	0x008B, r25	; 0x80008b <__TEXT_REGION_LENGTH__+0x7f808b>
  180:	80 93 8a 00 	sts	0x008A, r24	; 0x80008a <__TEXT_REGION_LENGTH__+0x7f808a>
  184:	08 95       	ret
@@ -313,13 +312,10 @@ void Mux_pines()
  1b6:	80 93 04 01 	sts	0x0104, r24	; 0x800104 <DutyCycle>
 		rest_servo(DutyCycle);
  1ba:	0e 94 5f 01 	call	0x2be	; 0x2be <rest_servo>
-		
-		//DutyCycle= Valor_Servo_PWM(Valor_ADC);
-		//rest_servo(DutyCycle);
 		break;
  1be:	28 c0       	rjmp	.+80     	; 0x210 <Mux_pines+0x8a>
-		case 1:
 		
+		case 1:
 		ADMUX &= ~((1 << MUX3) | (1 << MUX2) | (1 << MUX1)|(1<< MUX0)); // Limpiar bits MUX
  1c0:	ec e7       	ldi	r30, 0x7C	; 124
  1c2:	f0 e0       	ldi	r31, 0x00	; 0
@@ -340,6 +336,7 @@ void Mux_pines()
  1e2:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <__DATA_REGION_ORIGIN__>
 		break;
  1e6:	14 c0       	rjmp	.+40     	; 0x210 <Mux_pines+0x8a>
+		
 		case 2:
 		ADMUX &= ~((1 << MUX3) | (1 << MUX2) | (1 << MUX1)|(1<< MUX0)); // Limpiar bits MUX
  1e8:	ec e7       	ldi	r30, 0x7C	; 124
@@ -401,7 +398,6 @@ ISR(ADC_vect){
  244:	ff 93       	push	r31
 	Mux_pines();
  246:	0e 94 c3 00 	call	0x186	; 0x186 <Mux_pines>
-	//_delay_ms(2);
 	ADCSRA |= (1<<ADSC);
  24a:	ea e7       	ldi	r30, 0x7A	; 122
  24c:	f0 e0       	ldi	r31, 0x00	; 0
